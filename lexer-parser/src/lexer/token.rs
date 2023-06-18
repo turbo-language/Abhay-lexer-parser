@@ -1,12 +1,11 @@
-use std::fmt;
+use std::{fmt, ops::Range};
 
 // Lifetimes are needed to ensure that the reference of the remains as long the Lexer Struct exists
 #[derive(Debug, PartialEq, Clone, Copy)]
-pub struct Lexer<'a> {
-    pub file_name: &'a  String,
-    pub tokenType: Token,
+pub struct Token_lexer<'a> {
+    pub token_type: Token,
     pub start: usize,
-    pub len: u32
+    pub len: u32,
 }
 
 
@@ -20,7 +19,6 @@ impl Token {
 }
 
 
-#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Token {
     Def,
     For,
@@ -47,7 +45,7 @@ pub enum Token {
     CharValue,
     FloatValue,
 
-
+    Number,
 
     OpeningParenthesis,
     ClosingParenthesis,
@@ -63,9 +61,15 @@ pub enum Token {
     Slash,
     Percent,
     EqualSign,
-    ExclamationEqualSign,
+
+    LessSign,
+    GreaterSign,
+    CheckEqualSign,
+    NotEqualSign,
     LessThanEqualSign,
     GreaterThanEqualSign,
+
+
     Comma,
     Colon,
     SemiColon,
@@ -73,10 +77,12 @@ pub enum Token {
 
     Or,
     And,
-    Let,
     If,
     Else,
 
+    Comment,
+
+    EndFile
 }
 
 
@@ -125,6 +131,12 @@ impl fmt::Display for Token {
             Token::And => write!(f, "And"),
             Token::If => write!(f, "If"),
             Token::Else => write!(f, "Else"),
+            Token::SemiColon => write!(f, ";"),
+            Token::Dot => write!(f, "."),
+            // Token::Number => todo!(),
+            Token::Comment => write!(f, "//"),
+            // Token::EndFile => todo!(),
+            Token::CheckEqualSign => write!(f, "=="),
         }
     }
 }
