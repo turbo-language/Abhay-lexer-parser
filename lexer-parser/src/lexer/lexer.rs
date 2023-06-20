@@ -293,9 +293,18 @@ impl<'a> Lexer<'a> {
 
 }
 
-
-
-
-fn main () {
-
+// streamlined function that lexes the source code based on the functions
+fn lex_source_code<'a>(source: &'a str) -> Result<Vec<Token>, String> {
+    let mut lexer = Lexer::new("", source);
+    let mut tokens = Vec::new();
+    
+    loop {
+        let token = lexer.next_token()?;
+        if token.is_end_of_file() {
+            break;
+        }
+        tokens.push(token);
+    }
+    
+    Ok(tokens)
 }
