@@ -1,12 +1,11 @@
 
-use token::{Token, TokenLexer};
+pub token::{Token, TokenLexer};
 
 
 use std::iter::Peekable;
 use std::str::CharIndices;
 use std::string::String;
 
-use super::token;
 
 pub struct Lexer<'a> {
     file_name: &'a str,
@@ -58,30 +57,31 @@ impl<'a> Lexer<'a> {
 
     fn keyword_match(s: &str) -> Token {
         match s {
-            "and" => And,
-            "break" => Break,
-            "do" => Do,
-            "else" => Else,
-            "elseif" => ElseIf,
-            "end" => End,
-            "false" => False,
-            "for" => For,
-            "function" => Function,
-            "if" => If,
-            "in" => In,
-            "local" => Local,
-            "nil" => Nil,
-            "not" => Not,
-            "or" => Or,
-            "repeat" => Repeat,
-            "return" => Return,
-            "then" => Then,
-            "true" => True,
-            "until" => Until,
-            "while" => While,
-            _ => Identifier,
+            "void" => Token::Void,
+            "int" => Token::Int,
+            "string" => Token::String,
+            "long" => Token::Long,
+            "boolean" => Token::Boolean,
+            "char" => Token::Char,
+            "float" => Token::Float,
+            "def" => Token::Def,
+            "for" => Token::For,
+            "while" => Token::While,
+            "class" => Token::Class,
+            "return" => Token::Return,
+            "public" => Token::Public,
+            "private" => Token::Private,
+            "print" => Token::Print,
+            "let" => Token::Let,
+            "end" => Token::End,
+            "false" => Token::False,
+            "true" => Token::True,
+            "if" => Token::If,
+            "in" => Token::In,
+            "then" => Token::Then,
+            _ => Token::Identifier,
         }
-    }
+}
 
 
 
@@ -203,7 +203,7 @@ impl<'a> Lexer<'a> {
             if self.try_next('=') {
                 let typ = match first_char {
                     '=' => CheckEqualSign,
-                    '=' => NotEqualSign,
+                    '=' => ExclamationEqualSign,
                     '<' => LessThanEqualSign,
                     '>' => GreaterThanEqualSign,
                     _ => panic!("peek_equals was called with first_char = {}", first_char),
@@ -245,11 +245,11 @@ impl<'a> Lexer<'a> {
         Err("Unclosed string".to_string())
     }
 
-    fn lex_number_after_decimal(&mut self, tok_start: usize) -> Result<()> {
+    fn lex_number_after_decimal(&mut self, tok_start: usize) -> Result<usize, usize> {
         self.lex_digits();
         return self.lex_exponent(tok_start);
     }
-
+    /* 
     /// Reads in a number which starts with a digit (as opposed to a decimal point).
     fn lex_full_number(&mut self, tok_start: usize, first_char: char) -> Result<Token, Token> {
     // Read in the rest of the base
@@ -258,7 +258,7 @@ impl<'a> Lexer<'a> {
         // Handle the fraction and exponent components.
         if self.try_next('.') {
             match self.peek_char() {6
-                
+
                 Some(c) if c.is_ascii_digit() => self.lex_number_after_decimal(tok_start)?,
                 _ => self.lex_exponent(tok_start)?,
             }
@@ -269,7 +269,7 @@ impl<'a> Lexer<'a> {
 
         Ok(NumberValue)
     }
-
+    */
 
         /// Returns the current position of the `Lexer`.
     #[must_use]

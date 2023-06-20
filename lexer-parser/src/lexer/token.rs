@@ -1,7 +1,7 @@
 use std::{fmt, ops::Range};
 
 // Lifetimes are needed to ensure that the reference of the remains as long the Lexer Struct exists
-#[derive(Debug, PartialEq, Clone)]
+#[derive(PartialEq, Clone)]
 pub struct TokenLexer {
     pub token_type: Token,
     pub start: usize,
@@ -57,6 +57,7 @@ pub enum Token {
     OpeningSquare,
     ClosingSquare,
 
+    ExclamationEqualSign,
 
     Plus,
     Minus,
@@ -143,6 +144,10 @@ impl fmt::Display for Token {
             Token::Comment => write!(f, "//"),
             // Token::EndFile => todo!(),
             Token::CheckEqualSign => write!(f, "=="),
+            Token::LessSign => todo!(),
+            Token::GreaterSign => todo!(),
+            Token::NotEqualSign => todo!(),
+            Token::EndFile => todo!(),
         }
     }
 }
