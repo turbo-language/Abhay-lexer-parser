@@ -1,4 +1,5 @@
 use crate::token::Token;
+use crate::lexer::Lexer;
 
 // Define the AST node types
 pub enum ASTNode {
@@ -9,70 +10,72 @@ pub enum ASTNode {
 
 pub struct StatementNode {
     // Define the fields for each statement type
+    pub assignment: Option<AssignmentNode>,
+    pub if_statement: Option<IfStatementNode>,
+    // Add other statement types here
 }
 
 pub struct ExpressionNode {
     // Define the fields for each expression type
+    pub binary_op: Option<BinaryOpNode>,
+    pub function_call: Option<FunctionCallNode>,
+    // Add other expression types here
 }
 
-// Implement the AST trait for printing the AST
-impl std::fmt::Debug for ASTNode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            ASTNode::Program(nodes) => {
-                for node in nodes {
-                    write!(f, "{:?}\n", node)?;
-                }
-                Ok(())
-            }
-            ASTNode::Statement(node) => write!(f, "{:?}", node),
-            ASTNode::Expression(node) => write!(f, "{:?}", node),
-        }
-    }
+pub struct AssignmentNode {
+    pub identifier: String,
+    pub expression: Box<ExpressionNode>,
 }
 
-impl std::fmt::Debug for StatementNode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // Implement the formatting for each statement type
-        // Example:
-        // match self {
-        //     StatementNode::Assignment(ident, expr) => {
-        //         write!(f, "Assignment: {:?} = {:?}", ident, expr)
-        //     }
-        //     StatementNode::If(condition, body, else_body) => {
-        //         write!(f, "If: {:?} {:?} {:?}", condition, body, else_body)
-        //     }
-        //     ...
-        // }
-        Ok(())
-    }
+pub struct IfStatementNode {
+    pub condition: Box<ExpressionNode>,
+    pub body: Box<StatementNode>,
+    pub else_body: Option<Box<StatementNode>>,
 }
 
-impl std::fmt::Debug for ExpressionNode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // Implement the formatting for each expression type
-        // Example:
-        // match self {
-        //     ExpressionNode::BinaryOp(op, lhs, rhs) => {
-        //         write!(f, "BinaryOp: {:?} {:?} {:?}", op, lhs, rhs)
-        //     }
-        //     ExpressionNode::FunctionCall(name, args) => {
-        //         write!(f, "FunctionCall: {:?} {:?}", name, args)
-        //     }
-        //     ...
-        // }
-        Ok(())
-    }
+pub struct BinaryOpNode {
+    pub operator: String,
+    pub lhs: Box<ExpressionNode>,
+    pub rhs: Box<ExpressionNode>,
 }
 
-// Implement the conversion from tokens to AST nodes
-impl From<Token> for ASTNode {
-    fn from(token: Token) -> Self {
+pub struct FunctionCallNode {
+    pub name: String,
+    pub arguments: Vec<ExpressionNode>,
+}
+
+// Implement the conversion from lexer tokens to AST nodes
+impl<'a> From<&'a Token> for ASTNode {
+    fn from(token: &'a Token) -> Self {
         match token {
             Token::Program => ASTNode::Program(vec![]),
-            Token::Statement => ASTNode::Statement(Box::new(StatementNode {})),
-            Token::Expression => ASTNode::Expression(Box::new(ExpressionNode {})),
+            Token::Statement => ASTNode::Statement(Box::new(StatementNode {
+                assignment: None,
+                if_statement: None,
+            })),
+            Token::Expression => ASTNode::Expression(Box::new(ExpressionNode {
+                binary_op: None,
+                function_call: None,
+            })),
             _ => panic!("Invalid conversion from token to AST node"),
         }
     }
+}
+
+// Implement the conversion from lexer tokens to AST nodes
+pub fn parse_ast(source: &str) -> Result<Vec<ASTNode>, String> {
+    let mut lexer = Lexer::new(source);
+    let mut ast = Vec::new();
+
+    loop {
+        let token = lexer.next_token()?;
+        let node: ASTNode = (&token).into();
+        ast.push(node);
+
+        if token.is_eof() {
+            break;
+        }
+    }
+
+    Ok(ast)
 }

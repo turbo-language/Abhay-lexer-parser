@@ -1,7 +1,7 @@
 use std::{fmt, ops::Range};
 
 // Lifetimes are needed to ensure that the reference of the remains as long the Lexer Struct exists
-#[derive(PartialEq, Clone)]
+#[derive(PartialEq)]
 pub struct TokenLexer {
     pub token_type: Token,
     pub start: usize,

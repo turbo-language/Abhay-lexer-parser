@@ -1,7 +1,11 @@
+// Import the necessary modules
+use crate::lexer::{lexer, token};
+use crate::parser::ast::{ASTNode, StatementNode, ExpressionNode};
+
 // Implement the lexer-to-parser integration
 pub struct Parser {
     lexer: Lexer<'static>,
-    current_token: Option<Token>,
+    current_token: Option<token>,
 }
 
 impl Parser {
@@ -28,82 +32,74 @@ impl Parser {
     }
 
     fn parse_statement(&mut self) -> Result<ASTNode, String> {
-        // Parse the statement based on the current token
-        // Example:
-        // match self.current_token {
-        //     Some(Token::Assignment) => self.parse_assignment(),
-        //     Some(Token::If) => self.parse_if_statement(),
-        //     ...
-        //     _ => Err("Invalid statement".to_string()),
-        // }
-        unimplemented!()
+        match self.current_token {
+            Some(Token::Assignment) => self.parse_assignment(),
+            Some(Token::If) => self.parse_if_statement(),
+            // Handle other statement types here
+            _ => Err("Invalid statement".to_string()),
+        }
     }
 
     fn parse_expression(&mut self) -> Result<ASTNode, String> {
-        // Parse the expression based on the current token
-        // Example:
-        // match self.current_token {
-        //     Some(Token::BinaryOp) => self.parse_binary_op(),
-        //     Some(Token::FunctionCall) => self.parse_function_call(),
-        //     ...
-        //     _ => Err("Invalid expression".to_string()),
-        // }
-        unimplemented!()
+        match self.current_token {
+            Some(Token::Expression) => self.parse_expression_node(),
+            // Handle other expression types here
+            _ => Err("Invalid expression".to_string()),
+        }
+    }
+
+   fn parse_assignment(&mut self) -> Result<ASTNode, String> {
+    // Parse the assignment statement
+    match self.current_token {
+        Some(Token::Identifier(identifier)) => {
+            self.advance();
+            self.expect_token(Token::Assignment)?;
+            self.advance();
+            let expression = self.parse_expression()?;
+            Ok(ASTNode::Statement(Box::new(StatementNode::Assignment(identifier, expression))))
+        }
+        _ => Err("Expected identifier in assignment statement".to_string()),
+    }
+}
+
+    fn parse_if_statement(&mut self) -> Result<ASTNode, String> {
+        // Parse the if statement
+        self.expect_token(Token::If)?;
+        self.advance();
+        let condition = self.parse_expression()?;
+        let body = self.parse_statement()?;
+        let else_body = if self.current_token == Some(Token::Else) {
+            self.advance();
+            Some(Box::new(self.parse_statement()?))
+        } else {
+            None
+        };
+        Ok(ASTNode::Statement(Box::new(StatementNode::If(
+            condition,
+            Box::new(body),
+            else_body,
+        ))))
+    }
+
+    fn parse_expression_node(&mut self) -> Result<ASTNode, String> {
+        // Parse the expression node
+        let binary_op = self.parse_binary_op()?;
+        let function_call = self.parse_function_call()?;
+        Ok(ASTNode::Expression(Box::new(ExpressionNode {
+            binary_op,
+            function_call,
+        })))
+    }
+
+    // Helper function
+    fn expect_token(&mut self, expected_token: Token) -> Result<(), String> {
+        if self.current_token == Some(expected_token) {
+            self.advance();
+            Ok(())
+        } else {
+            Err(format!("Expected {:?}, found {:?}", expected_token, self.current_token))
+        }
     }
 
 
-
-    // ---------- Put all of these into seperate parse_functions files 
-
-    // Implement the parsing functions for each statement/expression type
-
-    // fn parse_assignment(&mut self) -> Result<ASTNode, String> {
-    //     // Parse the assignment statement
-    //     // Example:
-    //     // let identifier = self.current_token.expect("Expected identifier");
-    //     // self.advance();
-    //     // let expression = self.parse_expression()?;
-    //     // Ok(ASTNode::Statement(Box::new(StatementNode::Assignment(identifier, expression))))
-    //     unimplemented!()
-    // }
-
-    // fn parse_if_statement(&mut self) -> Result<ASTNode, String> {
-    //     // Parse the if statement
-    //     // Example:
-    //     // let condition = self.parse_expression()?;
-    //     // let body = self.parse_statement()?;
-    //     // let else_body = if self.current_token == Some(Token::Else) {
-    //     //     self.advance();
-    //     //     Some(self.parse_statement()?)
-    //     // } else {
-    //     //     None
-    //     // };
-    //     // Ok(ASTNode::Statement(Box::new(StatementNode::If(condition, body, else_body))))
-    //     unimplemented!()
-    // }
-
-    // Implement the parsing functions for each expression type
-
-    // fn parse_binary_op(&mut self) -> Result<ASTNode, String> {
-    //     // Parse the binary operation expression
-    //     // Example:
-    //     // let operator = self.current_token.expect("Expected binary operator");
-    //     // self.advance();
-    //     // let lhs = self.parse_expression()?;
-    //     // let rhs = self.parse_expression()?;
-    //     // Ok(ASTNode::Expression(Box::new(ExpressionNode::BinaryOp(operator, lhs, rhs))))
-    //     unimplemented!()
-    // }
-
-    // fn parse_function_call(&mut self) -> Result<ASTNode, String> {
-    //     // Parse the function call expression
-    //     // Example:
-    //     // let name = self.current_token.expect("Expected function name");
-    //     // self.advance();
-    //     // let args = self.parse_arguments()?;
-    //     // Ok(ASTNode::Expression(Box::new(ExpressionNode::FunctionCall(name, args))))
-    //     unimplemented!()
-    // }
 }
-
-// Add the Lexer struct definition and implementation here

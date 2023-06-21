@@ -1,10 +1,13 @@
 
-pub token::{Token, TokenLexer};
+use super::token::Token;
+
 
 
 use std::iter::Peekable;
 use std::str::CharIndices;
 use std::string::String;
+
+use super::token::TokenLexer;
 
 
 pub struct Lexer<'a> {
@@ -274,21 +277,18 @@ impl<'a> Lexer<'a> {
         /// Returns the current position of the `Lexer`.
     #[must_use]
     fn line_and_col(linebreaks: &[usize], pos: usize) -> (usize, usize) {
-    let iter = linebreaks.windows(2).enumerate();
-    for (line_num, linebreak_pair) in iter {
-        if pos < linebreak_pair[1] {
-            let column = pos - linebreak_pair[0];
-            // lines and columns start counting at 1
-            return (line_num + 1, column + 1);
+        let iter = linebreaks.windows(2).enumerate();
+        for (line_num, linebreak_pair) in iter {
+            if pos < linebreak_pair[1] {
+                let column = pos - linebreak_pair[0];
+                // lines and columns start counting at 1
+                return (line_num + 1, column + 1);
+            }
         }
+        let line_num = linebreaks.len() - 1;
+        let column = pos - linebreaks.last().unwrap();
+        (line_num + 1, column + 1)
     }
-    let line_num = linebreaks.len() - 1;
-    let column = pos - linebreaks.last().unwrap();
-    (line_num + 1, column + 1)
-}
-
-
-
 
 
 }
